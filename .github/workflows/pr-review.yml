@@ -1,0 +1,295 @@
+name: PR Review and Merge Conflict Check
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+  pull_request_target:
+    types: [opened, synchronize, reopened]
+
+permissions:
+  contents: read
+  pull-requests: write
+  issues: write
+  checks: write
+
+jobs:
+  check-merge-conflicts:
+    name: Check for Merge Conflicts
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout PR branch
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          fetch-depth: 0
+      
+      - name: Fetch base branch
+        run: |
+          git fetch origin ${{ github.event.pull_request.base.ref }}
+      
+      - name: Check for merge conflicts
+        id: conflict-check
+        run: |
+          echo "Checking for merge conflicts..."
+          
+          # Try to merge base branch into current branch
+          git config user.name "GitHub Actions"
+          git config user.email "actions@github.com"
+          
+          if git merge --no-commit --no-ff origin/${{ github.event.pull_request.base.ref }} 2>&1 | tee merge_output.txt; then
+            echo "has_conflicts=false" >> $GITHUB_OUTPUT
+            echo "✅ No merge conflicts detected"
+            git merge --abort 2>/dev/null || true
+          else
+            if grep -q "CONFLICT" merge_output.txt || grep -q "Automatic merge failed" merge_output.txt; then
+              echo "has_conflicts=true" >> $GITHUB_OUTPUT
+              echo "❌ Merge conflicts detected"
+              
+              # Get list of conflicting files
+              git diff --name-only --diff-filter=U > conflicting_files.txt || true
+              
+              if [ -s conflicting_files.txt ]; then
+                echo "Conflicting files:"
+                cat conflicting_files.txt
+                echo "conflicting_files<<EOF" >> $GITHUB_OUTPUT
+                cat conflicting_files.txt >> $GITHUB_OUTPUT
+                echo "EOF" >> $GITHUB_OUTPUT
+              fi
+              
+              git merge --abort 2>/dev/null || true
+            else
+              echo "has_conflicts=false" >> $GITHUB_OUTPUT
+              git merge --abort 2>/dev/null || true
+            fi
+          fi
+      
+      - name: Comment on PR - No Conflicts
+        if: steps.conflict-check.outputs.has_conflicts == 'false'
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const message = `## ✅ Merge Conflict Check Passed
+            
+            This PR can be merged cleanly with the base branch \`${{ github.event.pull_request.base.ref }}\`.
+            
+            No merge conflicts detected! 🎉`;
+            
+            // Check if we already commented
+            const comments = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number
+            });
+            
+            const botComment = comments.data.find(comment => 
+              comment.user.type === 'Bot' && 
+              comment.body.includes('Merge Conflict Check')
+            );
+            
+            if (botComment) {
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: botComment.id,
+                body: message
+              });
+            } else {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                body: message
+              });
+            }
+      
+      - name: Comment on PR - Conflicts Detected
+        if: steps.conflict-check.outputs.has_conflicts == 'true'
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const conflictingFiles = `${{ steps.conflict-check.outputs.conflicting_files }}`;
+            const fileList = conflictingFiles.trim() ? 
+              conflictingFiles.split('\n').map(f => `- \`${f}\``).join('\n') : 
+              'Unable to determine specific files';
+            
+            const message = `## ⚠️ Merge Conflicts Detected
+            
+            This PR has merge conflicts with the base branch \`${{ github.event.pull_request.base.ref }}\`.
+            
+            ### Conflicting Files:
+            ${fileList}
+            
+            ### How to Resolve:
+            1. Pull the latest changes from \`${{ github.event.pull_request.base.ref }}\`:
+               \`\`\`bash
+               git fetch origin
+               git merge origin/${{ github.event.pull_request.base.ref }}
+               \`\`\`
+            2. Resolve the conflicts in the files listed above
+            3. Stage the resolved files:
+               \`\`\`bash
+               git add <resolved-files>
+               \`\`\`
+            4. Complete the merge:
+               \`\`\`bash
+               git commit
+               \`\`\`
+            5. Push the changes:
+               \`\`\`bash
+               git push
+               \`\`\`
+            
+            The workflow will automatically re-check once you push the resolved conflicts.`;
+            
+            // Check if we already commented
+            const comments = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number
+            });
+            
+            const botComment = comments.data.find(comment => 
+              comment.user.type === 'Bot' && 
+              comment.body.includes('Merge Conflict Check')
+            );
+            
+            if (botComment) {
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: botComment.id,
+                body: message
+              });
+            } else {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                body: message
+              });
+            }
+      
+      - name: Add conflict label
+        if: steps.conflict-check.outputs.has_conflicts == 'true'
+        uses: actions/github-script@v7
+        continue-on-error: true
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            try {
+              // Create label if it doesn't exist
+              await github.rest.issues.createLabel({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                name: 'merge-conflict',
+                color: 'D93F0B',
+                description: 'This PR has merge conflicts'
+              });
+            } catch (error) {
+              // Label already exists, ignore error
+            }
+            
+            await github.rest.issues.addLabels({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              labels: ['merge-conflict']
+            });
+      
+      - name: Remove conflict label
+        if: steps.conflict-check.outputs.has_conflicts == 'false'
+        uses: actions/github-script@v7
+        continue-on-error: true
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            try {
+              await github.rest.issues.removeLabel({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                name: 'merge-conflict'
+              });
+            } catch (error) {
+              // Label doesn't exist or already removed, ignore error
+            }
+      
+      - name: Set status check
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const hasConflicts = '${{ steps.conflict-check.outputs.has_conflicts }}' === 'true';
+            
+            await github.rest.repos.createCommitStatus({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              sha: context.payload.pull_request.head.sha,
+              state: hasConflicts ? 'failure' : 'success',
+              context: 'Merge Conflict Check',
+              description: hasConflicts ? 
+                'Merge conflicts detected - please resolve' : 
+                'No merge conflicts detected'
+            });
+
+  pr-review-checklist:
+    name: PR Review Checklist
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout PR branch
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          fetch-depth: 0
+      
+      - name: Post review checklist
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const message = `## 📋 Pull Request Review Checklist
+            
+            Thank you for your contribution! Please ensure the following before merging:
+            
+            - [ ] Code follows project coding standards
+            - [ ] Changes are focused and minimal
+            - [ ] All tests pass (if applicable)
+            - [ ] No merge conflicts with base branch
+            - [ ] PR has a clear description of changes
+            - [ ] Related issues are linked (if applicable)
+            
+            ### For Reviewers:
+            - [ ] Code has been reviewed
+            - [ ] Logic is sound and maintainable
+            - [ ] No security vulnerabilities introduced
+            - [ ] Documentation updated (if needed)
+            
+            ---
+            *This checklist is automatically posted to help maintain code quality.*`;
+            
+            // Only post checklist once when PR is first opened
+            if (context.payload.action === 'opened') {
+              const comments = await github.rest.issues.listComments({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number
+              });
+              
+              const checklistExists = comments.data.some(comment => 
+                comment.user.type === 'Bot' && 
+                comment.body.includes('Pull Request Review Checklist')
+              );
+              
+              if (!checklistExists) {
+                await github.rest.issues.createComment({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  issue_number: context.issue.number,
+                  body: message
+                });
+              }
+            }

@@ -1,0 +1,203 @@
+name: Code Quality and Review
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+    branches:
+      - main
+      - develop
+
+permissions:
+  contents: read
+  pull-requests: write
+  checks: write
+
+jobs:
+  code-review:
+    name: Automated Code Review
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      
+      - name: Get changed files
+        id: changed-files
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const { data: files } = await github.rest.pulls.listFiles({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: context.issue.number
+            });
+            
+            const changedFiles = files.map(f => ({
+              filename: f.filename,
+              status: f.status,
+              additions: f.additions,
+              deletions: f.deletions,
+              changes: f.changes
+            }));
+            
+            core.setOutput('files', JSON.stringify(changedFiles));
+            core.setOutput('count', files.length);
+            
+            return changedFiles;
+      
+      - name: Analyze PR size
+        id: pr-size
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const files = JSON.parse('${{ steps.changed-files.outputs.files }}');
+            
+            let totalAdditions = 0;
+            let totalDeletions = 0;
+            
+            files.forEach(file => {
+              totalAdditions += file.additions;
+              totalDeletions += file.deletions;
+            });
+            
+            const totalChanges = totalAdditions + totalDeletions;
+            
+            let size = 'small';
+            let emoji = '🟢';
+            if (totalChanges > 500) {
+              size = 'large';
+              emoji = '🔴';
+            } else if (totalChanges > 200) {
+              size = 'medium';
+              emoji = '🟡';
+            }
+            
+            core.setOutput('size', size);
+            core.setOutput('emoji', emoji);
+            core.setOutput('additions', totalAdditions);
+            core.setOutput('deletions', totalDeletions);
+            core.setOutput('total', totalChanges);
+      
+      - name: Comment PR analysis
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const size = '${{ steps.pr-size.outputs.size }}';
+            const emoji = '${{ steps.pr-size.outputs.emoji }}';
+            const additions = '${{ steps.pr-size.outputs.additions }}';
+            const deletions = '${{ steps.pr-size.outputs.deletions }}';
+            const fileCount = '${{ steps.changed-files.outputs.count }}';
+            
+            let sizeMessage = '';
+            if (size === 'large') {
+              sizeMessage = `\n⚠️ **Note:** This is a large PR. Consider breaking it into smaller PRs for easier review.`;
+            } else if (size === 'medium') {
+              sizeMessage = `\n📝 This is a medium-sized PR. Reviewers should allocate sufficient time.`;
+            } else {
+              sizeMessage = `\n✨ This is a small, focused PR - perfect for quick review!`;
+            }
+            
+            const message = `## ${emoji} PR Size Analysis
+            
+            - **Files changed:** ${fileCount}
+            - **Lines added:** +${additions}
+            - **Lines deleted:** -${deletions}
+            - **Total changes:** ${additions + deletions} lines
+            - **Size:** ${size.toUpperCase()}
+            ${sizeMessage}
+            
+            ---
+            *Automated analysis to help reviewers estimate review time.*`;
+            
+            // Check for existing analysis comment
+            const comments = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number
+            });
+            
+            const analysisComment = comments.data.find(comment => 
+              comment.user.type === 'Bot' && 
+              comment.body.includes('PR Size Analysis')
+            );
+            
+            if (analysisComment) {
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: analysisComment.id,
+                body: message
+              });
+            } else {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                body: message
+              });
+            }
+      
+      - name: Check for common issues
+        id: common-issues
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const files = JSON.parse('${{ steps.changed-files.outputs.files }}');
+            const issues = [];
+            
+            // Check for direct changes to main/master
+            files.forEach(file => {
+              // Check for potential merge conflict markers
+              if (file.filename.includes('<<<<<<') || file.filename.includes('>>>>>>')) {
+                issues.push('⚠️ Potential merge conflict markers detected in filenames');
+              }
+              
+              // Check for large files
+              if (file.changes > 1000) {
+                issues.push(`⚠️ Large file change detected: ${file.filename} (${file.changes} lines)`);
+              }
+            });
+            
+            core.setOutput('issues', JSON.stringify(issues));
+            core.setOutput('has_issues', issues.length > 0);
+      
+      - name: Post common issues
+        if: steps.common-issues.outputs.has_issues == 'true'
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const issues = JSON.parse('${{ steps.common-issues.outputs.issues }}');
+            
+            const message = `## ⚠️ Potential Issues Detected
+            
+            ${issues.map(issue => `- ${issue}`).join('\n')}
+            
+            Please review these items before merging.`;
+            
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              body: message
+            });
+      
+      - name: Set success status
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            await github.rest.repos.createCommitStatus({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              sha: context.payload.pull_request.head.sha,
+              state: 'success',
+              context: 'Code Quality Review',
+              description: 'Automated code review completed'
+            });
