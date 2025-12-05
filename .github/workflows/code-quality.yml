@@ -89,8 +89,8 @@ jobs:
           script: |
             const size = '${{ steps.pr-size.outputs.size }}';
             const emoji = '${{ steps.pr-size.outputs.emoji }}';
-            const additions = '${{ steps.pr-size.outputs.additions }}';
-            const deletions = '${{ steps.pr-size.outputs.deletions }}';
+            const additions = parseInt('${{ steps.pr-size.outputs.additions }}', 10) || 0;
+            const deletions = parseInt('${{ steps.pr-size.outputs.deletions }}', 10) || 0;
             const fileCount = '${{ steps.changed-files.outputs.count }}';
             
             let sizeMessage = '';
@@ -151,14 +151,8 @@ jobs:
             const files = JSON.parse('${{ steps.changed-files.outputs.files }}');
             const issues = [];
             
-            // Check for direct changes to main/master
+            // Check for large files
             files.forEach(file => {
-              // Check for potential merge conflict markers
-              if (file.filename.includes('<<<<<<') || file.filename.includes('>>>>>>')) {
-                issues.push('⚠️ Potential merge conflict markers detected in filenames');
-              }
-              
-              // Check for large files
               if (file.changes > 1000) {
                 issues.push(`⚠️ Large file change detected: ${file.filename} (${file.changes} lines)`);
               }

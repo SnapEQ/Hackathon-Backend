@@ -52,9 +52,11 @@ jobs:
               if [ -s conflicting_files.txt ]; then
                 echo "Conflicting files:"
                 cat conflicting_files.txt
-                echo "conflicting_files<<EOF" >> $GITHUB_OUTPUT
+                # Use a unique delimiter to prevent injection
+                delimiter="CONFLICTING_FILES_$(date +%s)"
+                echo "conflicting_files<<${delimiter}" >> $GITHUB_OUTPUT
                 cat conflicting_files.txt >> $GITHUB_OUTPUT
-                echo "EOF" >> $GITHUB_OUTPUT
+                echo "${delimiter}" >> $GITHUB_OUTPUT
               fi
               
               git merge --abort 2>/dev/null || true
@@ -110,9 +112,10 @@ jobs:
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
-            const conflictingFiles = `${{ steps.conflict-check.outputs.conflicting_files }}`;
-            const fileList = conflictingFiles.trim() ? 
-              conflictingFiles.split('\n').map(f => `- \`${f}\``).join('\n') : 
+            const conflictingFiles = `${{ steps.conflict-check.outputs.conflicting_files }}`.trim();
+            // Properly escape file names for display
+            const fileList = conflictingFiles ? 
+              conflictingFiles.split('\n').filter(f => f.trim()).map(f => `- \`${f.replace(/`/g, '\\`')}\``).join('\n') : 
               'Unable to determine specific files';
             
             const message = `## ⚠️ Merge Conflicts Detected
