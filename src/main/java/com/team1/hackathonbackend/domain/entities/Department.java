@@ -1,5 +1,7 @@
-package com.team1.hackathonbackend.domain.entities.dicts;
+package com.team1.hackathonbackend.domain.entities;
 
+import com.team1.hackathonbackend.domain.entities.dicts.BudgetPart;
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
@@ -9,14 +11,15 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Data
-@AllArgsConstructor
 @NoArgsConstructor
+@AllArgsConstructor
 @Builder
 @Entity
-@Table(name = "departaments")
-public class Department { // Dział
+@Table(name = "departments")
+public class Department {
     @Id
-    private String departmentId;
+    @Column(nullable = false)
+    private Long id;
 
     private String name;
 }

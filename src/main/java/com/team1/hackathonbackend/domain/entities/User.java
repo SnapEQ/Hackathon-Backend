@@ -15,14 +15,17 @@ import lombok.NoArgsConstructor;
 @Table(name = "users")
 public class User {
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "master_id_seq")
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "user_id_seq")
     private Long userId;
 
     private String username;
 
     private String password;
 
+    @Enumerated(EnumType.STRING)
+    private Role role;
+
     @ManyToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "organization_unit_id")
-    private OrganizationUnit organizationUnit;
+    private Department department;
 }

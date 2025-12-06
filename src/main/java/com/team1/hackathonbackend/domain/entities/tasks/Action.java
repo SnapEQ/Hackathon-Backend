@@ -11,13 +11,12 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Builder
 @Entity
-@Table(name = "functions")
+@Table(name = "actions")
 public class Action {
     @Id
-    private Long id;
+    private Long actionId;
 
     private String description;
-    private Boolean completed = false;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "subtask_id")

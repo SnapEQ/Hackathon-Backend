@@ -1,5 +1,6 @@
 package com.team1.hackathonbackend.domain.entities.dicts;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
@@ -16,6 +17,7 @@ import lombok.NoArgsConstructor;
 @Table(name = "finance_sources") // Dict
 public class FinanceSource { // Źródło Finansowania
     @Id
+    @Column(nullable = false)
     private String financeSourceId;
 
     private String name;

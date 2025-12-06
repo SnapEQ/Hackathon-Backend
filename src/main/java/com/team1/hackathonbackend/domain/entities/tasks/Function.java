@@ -17,7 +17,7 @@ import java.util.List;
 @Table(name = "functions")
 public class Function {
     @Id
-    private Long id;
+    private Long functionId;
 
     private String name;
 

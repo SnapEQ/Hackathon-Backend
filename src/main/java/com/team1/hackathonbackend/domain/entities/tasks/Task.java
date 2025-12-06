@@ -14,13 +14,12 @@ import java.util.List;
 @AllArgsConstructor
 @Builder
 @Entity
-@Table(name = "functions")
+@Table(name = "tasks")
 public class Task {
     @Id
-    private Long id;
+    private Long taskId;
 
-    private String title;
-    private String description;
+    private String name;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "function_id")

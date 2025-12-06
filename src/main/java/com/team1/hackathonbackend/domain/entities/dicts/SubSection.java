@@ -14,11 +14,11 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Builder
 @Entity
-@Table(name = "sections")
-public class Section { // Dział
+@Table(name = "sub_sections") // Dict
+public class SubSection { // Rozdziały
     @Id
     @Column(nullable = false)
-    private String sectionId;
+    private String subSectionId;
 
     private String name;
 }

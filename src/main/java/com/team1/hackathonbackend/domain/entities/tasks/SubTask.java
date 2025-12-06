@@ -14,10 +14,10 @@ import java.util.List;
 @AllArgsConstructor
 @Builder
 @Entity
-@Table(name = "functions")
+@Table(name = "sub_tasks")
 public class SubTask {
     @Id
-    private Long id;
+    private Long subTaskId;
 
     private String name;
 
