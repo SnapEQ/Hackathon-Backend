@@ -6,6 +6,7 @@ import com.team1.hackathonbackend.domain.entities.User;
 import com.team1.hackathonbackend.repositories.DepartmentRepository;
 import com.team1.hackathonbackend.repositories.UserRepository;
 import com.team1.hackathonbackend.services.UserService;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -41,7 +42,7 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional(readOnly = true)
     public User getUserById(Long id) {
-        return null;
+        return userRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("User not found: " + id));
     }
 
     @Override
