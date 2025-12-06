@@ -18,7 +18,7 @@ import lombok.NoArgsConstructor;
 public class SubSection { // Rozdziały
     @Id
     @Column(nullable = false)
-    private String subSectionId;
+    private String id;
 
     private String name;
 }

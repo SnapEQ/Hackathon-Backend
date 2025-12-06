@@ -18,7 +18,7 @@ import lombok.NoArgsConstructor;
 public class Section { // Dział
     @Id
     @Column(nullable = false)
-    private String sectionId;
+    private String id;
 
     private String name;
 }

@@ -18,7 +18,7 @@ import lombok.NoArgsConstructor;
 public class BudgetPart {
     @Id
     @Column(nullable = false)
-    private String budgetPartId;
+    private String id;
 
     private String name;
 }

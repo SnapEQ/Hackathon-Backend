@@ -18,7 +18,7 @@ import lombok.NoArgsConstructor;
 public class Paragraph { // Paragrafy
     @Id
     @Column(nullable = false)
-    private String paragraphId;
+    private String id;
 
     private String name;
 }
