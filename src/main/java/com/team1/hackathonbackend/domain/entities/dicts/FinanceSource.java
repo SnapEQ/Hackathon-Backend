@@ -18,7 +18,7 @@ import lombok.NoArgsConstructor;
 public class FinanceSource { // Źródło Finansowania
     @Id
     @Column(nullable = false)
-    private String financeSourceId;
+    private String id;
 
     private String name;
 
