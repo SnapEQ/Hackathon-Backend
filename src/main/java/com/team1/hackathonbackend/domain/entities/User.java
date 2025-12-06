@@ -1,9 +1,7 @@
 package com.team1.hackathonbackend.domain.entities;
 
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -14,8 +12,17 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Builder
 @Entity
-@Table(name = "paragraphs")
+@Table(name = "users")
 public class User {
     @Id
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "master_id_seq")
     private Long userId;
+
+    private String username;
+
+    private String password;
+
+    @ManyToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "organization_unit_id")
+    private OrganizationUnit organizationUnit;
 }
