@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/budget-items")
+@RequestMapping("/api/budget-items")
 public class BudgetItemController {
 
     private final BudgetItemMapper budgetItemMapper;
@@ -24,10 +24,7 @@ public class BudgetItemController {
 
     @PostMapping
     public ResponseEntity<BudgetItemDto> createBudgetItem(@RequestBody BudgetItemDto budgetItemDto) {
-        System.out.println(budgetItemDto.getId());
         BudgetItem budgetItem = budgetItemService.createBudgetItem(budgetItemMapper.toEntity(budgetItemDto));
-        System.out.println(budgetItem.getId());
-        System.out.println(budgetItemMapper.toDto(budgetItem).getId());
         return new ResponseEntity<>(budgetItemMapper.toDto(budgetItem), HttpStatus.CREATED);
     }
 
@@ -35,5 +32,19 @@ public class BudgetItemController {
     public ResponseEntity<List<BudgetItemDto>> getAllBudgetItems() {
         List<BudgetItem> budgetItems = budgetItemService.getAllBudgetItems();
         return new ResponseEntity<>(budgetItemMapper.toListDto(budgetItems), HttpStatus.OK);
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<BudgetItemDto> updatePartialBudgetItem(
+            @PathVariable Long id,
+            @RequestBody BudgetItemDto budgetItemDto) {
+        BudgetItem updatedBudgetItem = budgetItemService.updatePartialBudgetItem(id, budgetItemMapper.toEntity(budgetItemDto));
+        return new ResponseEntity<>(budgetItemMapper.toDto(updatedBudgetItem), HttpStatus.OK);
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<BudgetItemDto> getBudgetItemById(@PathVariable Long id) {
+        BudgetItem budgetItem = budgetItemService.getBudgetItemById(id);
+        return new ResponseEntity<>(budgetItemMapper.toDto(budgetItem), HttpStatus.OK);
     }
 }

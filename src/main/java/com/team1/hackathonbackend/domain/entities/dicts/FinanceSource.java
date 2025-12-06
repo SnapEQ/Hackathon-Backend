@@ -21,5 +21,4 @@ public class FinanceSource { // Źródło Finansowania
     private String id;
 
     private String name;
-
 }

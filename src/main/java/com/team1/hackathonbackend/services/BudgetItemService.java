@@ -7,4 +7,6 @@ import java.util.List;
 public interface BudgetItemService {
     BudgetItem createBudgetItem(BudgetItem budgetItem);
     List<BudgetItem> getAllBudgetItems();
+    BudgetItem updatePartialBudgetItem(Long id, BudgetItem budgetItem);
+    BudgetItem getBudgetItemById(Long id);
 }
