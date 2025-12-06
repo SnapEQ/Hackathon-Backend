@@ -9,7 +9,7 @@ services:
       POSTGRES_USER: appuser
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set in .env}
     ports:
-      - "5432:5432"   # expose DB to LAN (remove or change if you don’t want remote DB access)
+      - "5432:5432"
     volumes:
       - db-data:/var/lib/postgresql/data
     healthcheck:
@@ -24,7 +24,7 @@ services:
     depends_on:
       - postgres
     ports:
-      - "8081:8080"   # Adminer UI on host:8081
+      - "8081:8080"
     environment:
       ADMINER_DEFAULT_SERVER: postgres
 
@@ -37,20 +37,13 @@ services:
       postgres:
         condition: service_healthy
     ports:
-      - "8080:8080"   # Spring Boot on host:8080
+      - "8080:8080"
     environment:
-      # Make the app listen on all interfaces (important inside containers)
-      SERVER_ADDRESS: 0.0.0.0
-      SERVER_PORT: 8080
-
-      # Point Spring to Postgres container (do not use localhost here)
+      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-docker}
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/appdb
       SPRING_DATASOURCE_USERNAME: appuser
       SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD}
-      SPRING_DATASOURCE_DRIVER_CLASS_NAME: org.postgresql.Driver
-
-      # Optional profile if you use it
-      SPRING_PROFILES_ACTIVE: docker
+      JAVA_OPTS: -Xms256m -Xmx512m
 
 volumes:
   db-data:

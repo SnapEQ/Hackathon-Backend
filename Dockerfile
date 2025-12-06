@@ -1,19 +1,18 @@
 # syntax=docker/dockerfile:1
-
-# ---- Build stage ----
-FROM maven:3.9-eclipse-temurin-21-alpine AS builder
-WORKDIR /workspace
-COPY pom.xml .
-RUN mvn -q -DskipTests dependency:go-offline
-COPY src ./src
-RUN mvn -q -DskipTests clean package
-
-# ---- Runtime stage ----
-FROM eclipse-temurin:21-jre-alpine
-# Non-root user
-RUN addgroup -S app && adduser -S app -G app
-USER app
+FROM maven:3.9.9-eclipse-temurin-21 AS build
 WORKDIR /app
-COPY --from=builder /workspace/target/*.jar app.jar
+COPY pom.xml ./
+RUN mvn -B -q -DskipTests dependency:go-offline
+COPY src ./src
+RUN mvn -B -DskipTests package
+
+FROM eclipse-temurin:21-jre-alpine
+WORKDIR /app
+# Copy the fat jar built by Spring Boot (adjust if your jar name differs)
+COPY --from=build /app/target/*.jar /app/app.jar
+# Run as non-root
+RUN addgroup -S spring && adduser -S spring -G spring
+USER spring:spring
 EXPOSE 8080
-ENTRYPOINT ["java","-XX:+UseZGC","-XX:MaxRAMPercentage=75.0","-jar","/app/app.jar"]
+ENV JAVA_OPTS=""
+ENTRYPOINT ["sh","-c","java $JAVA_OPTS -jar /app/app.jar"]
