@@ -2,6 +2,7 @@ package com.team1.hackathonbackend.services.impl;
 
 import com.team1.hackathonbackend.domain.entities.CreateUserRequest;
 import com.team1.hackathonbackend.domain.entities.Department;
+import com.team1.hackathonbackend.domain.entities.Role;
 import com.team1.hackathonbackend.domain.entities.User;
 import com.team1.hackathonbackend.repositories.DepartmentRepository;
 import com.team1.hackathonbackend.repositories.UserRepository;
@@ -26,8 +27,7 @@ public class UserServiceImpl implements UserService {
         User newUser = new User();
         newUser.setUsername(createUserRequest.getUsername());
         newUser.setPassword(createUserRequest.getPassword());
-        newUser.setRole(createUserRequest.getRole());
-
+        user.setRole(createUserRequest.getRole() != null ? createUserRequest.getRole() : Role.DEP_USER);
         newUser.setDepartment(
                 departmentRepository.findById(
                 createUserRequest.getDepartmentId())

@@ -1,7 +1,9 @@
 package com.team1.hackathonbackend.services.impl;
 
 import com.team1.hackathonbackend.domain.entities.BudgetItem;
+import com.team1.hackathonbackend.domain.entities.Department;
 import com.team1.hackathonbackend.repositories.BudgetItemRepository;
+import com.team1.hackathonbackend.repositories.DepartmentRepository;
 import com.team1.hackathonbackend.services.BudgetItemService;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -9,15 +11,18 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
 public class BudgetItemServiceImpl implements BudgetItemService {
     private BudgetItemRepository budgetItemRepository;
+    private DepartmentRepository departmentRepository;
 
     @Autowired
-    public BudgetItemServiceImpl(BudgetItemRepository budgetItemRepository) {
+    public BudgetItemServiceImpl(BudgetItemRepository budgetItemRepository, DepartmentRepository departmentRepository) {
         this.budgetItemRepository = budgetItemRepository;
+        this.departmentRepository = departmentRepository;
     }
 
     @Override
@@ -50,7 +55,7 @@ public class BudgetItemServiceImpl implements BudgetItemService {
 
     @Override
     public List<BudgetItem> getBudgetItemByDepartmentId(Long departmentId) {
-        return budgetItemRepository.findAllByDepartment_Id(departmentId);
+        return budgetItemRepository.findAllByDepartmentId(departmentId);
     }
 
     private void updateNonNullFields(BudgetItem source, BudgetItem target) {

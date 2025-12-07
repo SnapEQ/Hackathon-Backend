@@ -51,6 +51,7 @@ public class BudgetItemController {
     @GetMapping("/departments/{id}")
     public ResponseEntity<List<BudgetItemDto>> getBudgetItemByDepartmentId(@PathVariable Long id) {
         List<BudgetItem> budgetItems = budgetItemService.getBudgetItemByDepartmentId(id);
+        System.out.println(budgetItems);
         List<BudgetItemDto> budgetItemsDto = budgetItemMapper.toListDto(budgetItems);
         return new ResponseEntity<>(budgetItemsDto, HttpStatus.OK);
 
