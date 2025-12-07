@@ -18,7 +18,7 @@ public class Action {
 
     private String description;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "subtask_id")
     private SubTask subTask;
 }

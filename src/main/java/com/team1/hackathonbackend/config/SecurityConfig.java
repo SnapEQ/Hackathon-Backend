@@ -26,6 +26,9 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         // public endpoints:
                         .requestMatchers("/actuator/health", "/actuator/info").permitAll()
+                        .requestMatchers("/swagger-ui/**").permitAll()
+                        .requestMatchers("/swagger-ui.html").permitAll()
+                        .requestMatchers("/v3/api-docs").permitAll()
                         .requestMatchers("/api/departments/**").permitAll()
                         .requestMatchers("/api/budget-items/**").permitAll()
                         .requestMatchers("/api/budget-items/departments/**").permitAll()

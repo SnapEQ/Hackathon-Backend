@@ -21,7 +21,7 @@ public class Task {
 
     private String name;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "function_id")
     private Function function;
 }
