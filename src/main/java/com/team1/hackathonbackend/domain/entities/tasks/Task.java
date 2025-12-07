@@ -17,19 +17,11 @@ import java.util.List;
 @Table(name = "tasks")
 public class Task {
     @Id
-    private Long taskId;
+    private Long id;
 
     private String name;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "function_id")
     private Function function;
-
-    @OneToMany(mappedBy = "task", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<SubTask> subTasks = new ArrayList<>();
-
-    public void addSubTask(SubTask subTask) {
-        subTasks.add(subTask);
-        subTask.setTask(this);
-    }
 }

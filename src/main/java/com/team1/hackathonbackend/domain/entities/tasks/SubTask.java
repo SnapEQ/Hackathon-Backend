@@ -17,19 +17,11 @@ import java.util.List;
 @Table(name = "sub_tasks")
 public class SubTask {
     @Id
-    private Long subTaskId;
+    private Long id;
 
     private String name;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "task_id")
     private Task task;
-
-    @OneToMany(mappedBy = "subTask", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Action> actions = new ArrayList<>();
-
-    public void addAction(Action action) {
-        actions.add(action);
-        action.setSubTask(this);
-    }
 }

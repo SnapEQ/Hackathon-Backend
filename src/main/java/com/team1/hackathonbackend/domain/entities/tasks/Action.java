@@ -14,7 +14,7 @@ import lombok.NoArgsConstructor;
 @Table(name = "actions")
 public class Action {
     @Id
-    private Long actionId;
+    private Long id;
 
     private String description;
 
