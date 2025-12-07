@@ -17,15 +17,8 @@ import java.util.List;
 @Table(name = "functions")
 public class Function {
     @Id
-    private Long functionId;
+    @Column(name = "id")
+    private Long id;
 
     private String name;
-
-    @OneToMany(mappedBy = "function", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Task> tasks = new ArrayList<>();
-
-    public void addTask(Task task) {
-        tasks.add(task);
-        task.setFunction(this);
-    }
 }
