@@ -47,4 +47,12 @@ public class BudgetItemController {
         BudgetItem budgetItem = budgetItemService.getBudgetItemById(id);
         return new ResponseEntity<>(budgetItemMapper.toDto(budgetItem), HttpStatus.OK);
     }
+
+    @GetMapping("/departments/{id}")
+    public ResponseEntity<List<BudgetItemDto>> getBudgetItemByDepartmentId(@PathVariable Long id) {
+        List<BudgetItem> budgetItems = budgetItemService.getBudgetItemByDepartmentId(id);
+        List<BudgetItemDto> budgetItemsDto = budgetItemMapper.toListDto(budgetItems);
+        return new ResponseEntity<>(budgetItemsDto, HttpStatus.OK);
+
+    }
 }

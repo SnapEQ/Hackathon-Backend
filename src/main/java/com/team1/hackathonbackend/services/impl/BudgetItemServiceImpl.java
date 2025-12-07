@@ -48,6 +48,11 @@ public class BudgetItemServiceImpl implements BudgetItemService {
                 .orElseThrow(() -> new EntityNotFoundException("BudgetItem not found with id: " + id));
     }
 
+    @Override
+    public List<BudgetItem> getBudgetItemByDepartmentId(Long departmentId) {
+        return budgetItemRepository.findAllByDepartment_Id(departmentId);
+    }
+
     private void updateNonNullFields(BudgetItem source, BudgetItem target) {
         if (source.getBudgetPart() != null) target.setBudgetPart(source.getBudgetPart());
         if (source.getSection() != null) target.setSection(source.getSection());
@@ -88,5 +93,6 @@ public class BudgetItemServiceImpl implements BudgetItemService {
         if (source.getLegalBasisForSubsidy() != null) target.setLegalBasisForSubsidy(source.getLegalBasisForSubsidy());
         if (source.getComments() != null) target.setComments(source.getComments());
     }
+
 
 }

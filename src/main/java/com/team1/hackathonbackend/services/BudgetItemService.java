@@ -9,4 +9,5 @@ public interface BudgetItemService {
     List<BudgetItem> getAllBudgetItems();
     BudgetItem updatePartialBudgetItem(Long id, BudgetItem budgetItem);
     BudgetItem getBudgetItemById(Long id);
+    List<BudgetItem> getBudgetItemByDepartmentId(Long departmentId);
 }
