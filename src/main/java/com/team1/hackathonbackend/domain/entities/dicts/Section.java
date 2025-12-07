@@ -17,7 +17,6 @@ import lombok.NoArgsConstructor;
 @Table(name = "sections")
 public class Section { // Dział
     @Id
-    @Column(nullable = false)
     private String id;
 
     private String name;

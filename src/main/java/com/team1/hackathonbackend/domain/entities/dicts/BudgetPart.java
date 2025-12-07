@@ -17,7 +17,6 @@ import lombok.NoArgsConstructor;
 @Table(name = "budget_parts") // Część Budżetowa
 public class BudgetPart {
     @Id
-    @Column(nullable = false)
     private String id;
 
     private String name;

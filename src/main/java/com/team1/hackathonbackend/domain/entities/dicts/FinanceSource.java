@@ -17,7 +17,6 @@ import lombok.NoArgsConstructor;
 @Table(name = "finance_sources") // Dict
 public class FinanceSource { // Źródło Finansowania
     @Id
-    @Column(nullable = false)
     private String id;
 
     private String name;

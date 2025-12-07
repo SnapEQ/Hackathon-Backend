@@ -1,8 +1,5 @@
 package com.team1.hackathonbackend.domain.dto;
 
-import com.team1.hackathonbackend.domain.entities.Department;
-import com.team1.hackathonbackend.domain.entities.dicts.*;
-import com.team1.hackathonbackend.domain.entities.tasks.Action;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -14,19 +11,18 @@ import lombok.NoArgsConstructor;
 @Builder
 public class BudgetItemDto {
     private Long id;
-    private BudgetPart budgetPart;
-    private Section section;
-    private SubSection subSection;
-    private Paragraph paragraph;
-    private FinanceSource financeSource;
+    // Reference IDs instead of full objects
+    private String budgetPartId;
+    private String sectionId;
+    private String subSectionId;
+    private String paragraphId;
+    private String financeSourceId;
+    private Long departmentId;
+    private Long actionId;
 
     private String expenseGroup; // Grupa wydatków
 
-    private Action action; // Z tąd można sobie wziąć zadania
-
     private String projectName; // Nazwa programu/projektu
-
-    private Department department; // Nazwa komórki organizacyjnej
 
     private String planWI; // Plan WI
 
@@ -43,7 +39,7 @@ public class BudgetItemDto {
     private Integer financialNeedsFor2026; // Potrzeby finansowe na 2026 rok
     private Integer limitOfExpensesFor2026; // Limit wydatków na rok 2026
     private Integer firstMoneyForRealizationIn2026; // "Kwota na realizację zadań w 2026 roku, która nie została zabezpieczona w limicie (kol. 17-kol. 18)"
-    private Integer MoneyInAgreementFor2026; // Kwota zawartej umowy/wniosku o udzielenie zamówienia publicznego
+    private Integer moneyInAgreementFor2026; // Kwota zawartej umowy/wniosku o udzielenie zamówienia publicznego
     private String agreementNumberFor2026; // Nr umowy/nr wniosku o udzielenie zamówienia publicznego
 
     private Integer financialNeedsFor2027; // Potrzeby finansowe na 2027 rok

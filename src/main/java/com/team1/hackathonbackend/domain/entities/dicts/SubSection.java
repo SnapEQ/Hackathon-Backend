@@ -17,7 +17,6 @@ import lombok.NoArgsConstructor;
 @Table(name = "sub_sections") // Dict
 public class SubSection { // Rozdziały
     @Id
-    @Column(nullable = false)
     private String id;
 
     private String name;

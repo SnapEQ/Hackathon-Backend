@@ -23,9 +23,9 @@ public class BudgetItemController {
     }
 
     @PostMapping
-    public ResponseEntity<BudgetItemDto> createBudgetItem(@RequestBody BudgetItemDto budgetItemDto) {
-        BudgetItem budgetItem = budgetItemService.createBudgetItem(budgetItemMapper.toEntity(budgetItemDto));
-        return new ResponseEntity<>(budgetItemMapper.toDto(budgetItem), HttpStatus.CREATED);
+    public ResponseEntity<BudgetItem> createBudgetItem(@RequestBody BudgetItemDto budgetItemDto) {
+        BudgetItem budgetItem = budgetItemService.createBudgetItem(budgetItemDto);
+        return new ResponseEntity<>(budgetItem, HttpStatus.CREATED);
     }
 
     @GetMapping
@@ -56,4 +56,37 @@ public class BudgetItemController {
         return new ResponseEntity<>(budgetItemsDto, HttpStatus.OK);
 
     }
+//
+//    /**
+//     * Acquire lock and get item for editing
+//     */
+//    @GetMapping("/{id}/lock")
+//    public ResponseEntity<?> getLocked(@PathVariable Long id) {
+//        try {
+//            BudgetItem item = budgetItemService.lockForEditing(id);
+//            return ResponseEntity.ok(item);
+//        } catch (EntityNotFoundException e) {
+//            return ResponseEntity.notFound().build();
+//        } catch (LockTimeoutException e) {
+//            return ResponseEntity
+//                    .status(HttpStatus.LOCKED)
+//                    .body("Item is currently being edited by another user");
+//        }
+//    }
+//
+//    /**
+//     * Try to acquire lock (non-blocking)
+//     */
+//    @GetMapping("/{id}/try-lock")
+//    public ResponseEntity<?> tryLock(@PathVariable Long id) {
+//        var result = budgetItemService.tryLockForEditing(id);
+//
+//        if (result.isPresent()) {
+//            return ResponseEntity.ok(result.get());
+//        } else {
+//            return ResponseEntity
+//                    .status(HttpStatus.LOCKED)
+//                    .body("Item is locked by another user");
+//        }
+//    }
 }

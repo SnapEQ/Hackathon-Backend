@@ -17,7 +17,6 @@ import lombok.NoArgsConstructor;
 @Table(name = "paragraphs") // Dict
 public class Paragraph { // Paragrafy
     @Id
-    @Column(nullable = false)
     private String id;
 
     private String name;

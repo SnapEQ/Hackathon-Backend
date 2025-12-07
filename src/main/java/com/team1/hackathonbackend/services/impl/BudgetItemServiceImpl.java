@@ -1,11 +1,12 @@
 package com.team1.hackathonbackend.services.impl;
 
+import com.team1.hackathonbackend.domain.dto.BudgetItemDto;
 import com.team1.hackathonbackend.domain.entities.BudgetItem;
-import com.team1.hackathonbackend.domain.entities.Department;
-import com.team1.hackathonbackend.repositories.BudgetItemRepository;
-import com.team1.hackathonbackend.repositories.DepartmentRepository;
+import com.team1.hackathonbackend.repositories.*;
 import com.team1.hackathonbackend.services.BudgetItemService;
 import jakarta.persistence.EntityNotFoundException;
+import jakarta.persistence.LockTimeoutException;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -17,18 +18,120 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class BudgetItemServiceImpl implements BudgetItemService {
     private BudgetItemRepository budgetItemRepository;
-    private DepartmentRepository departmentRepository;
+    private final BudgetPartRepository budgetPartRepository;
+    private final SectionRepository sectionRepository;
+    private final SubSectionRepository subSectionRepository;
+    private final ParagraphRepository paragraphRepository;
+    private final FinanceSourceRepository financeSourceRepository;
+    private final DepartmentRepository departmentRepository;
+    private final ActionRepository actionRepository;
 
     @Autowired
-    public BudgetItemServiceImpl(BudgetItemRepository budgetItemRepository, DepartmentRepository departmentRepository) {
+    public BudgetItemServiceImpl(BudgetItemRepository budgetItemRepository, BudgetPartRepository budgetPartRepository, SectionRepository sectionRepository, SubSectionRepository subSectionRepository, ParagraphRepository paragraphRepository, FinanceSourceRepository financeSourceRepository, DepartmentRepository departmentRepository, ActionRepository actionRepository) {
         this.budgetItemRepository = budgetItemRepository;
+        this.budgetPartRepository = budgetPartRepository;
+        this.sectionRepository = sectionRepository;
+        this.subSectionRepository = subSectionRepository;
+        this.paragraphRepository = paragraphRepository;
+        this.financeSourceRepository = financeSourceRepository;
         this.departmentRepository = departmentRepository;
+        this.actionRepository = actionRepository;
     }
 
     @Override
-    public BudgetItem createBudgetItem(BudgetItem budgetItem) {
-        // TODO Add proper validation
-        // TODO Add proper user validation
+    @Transactional
+    public BudgetItem createBudgetItem(BudgetItemDto dto) {
+        BudgetItem budgetItem = new BudgetItem();
+
+        // Load related entities by ID (or throw EntityNotFoundException)
+        if (dto.getBudgetPartId() != null) {
+            budgetItem.setBudgetPart(
+                    budgetPartRepository.findById(dto.getBudgetPartId())
+                            .orElseThrow(() -> new RuntimeException("BudgetPart not found"))
+            );
+        }
+
+        if (dto.getSectionId() != null) {
+            budgetItem.setSection(
+                    sectionRepository.findById(dto.getSectionId())
+                            .orElseThrow(() -> new RuntimeException("Section not found"))
+            );
+        }
+
+        if (dto.getSubSectionId() != null) {
+            budgetItem.setSubSection(
+                    subSectionRepository.findById(dto.getSubSectionId())
+                            .orElseThrow(() -> new RuntimeException("SubSection not found"))
+            );
+        }
+
+        if (dto.getParagraphId() != null) {
+            budgetItem.setParagraph(
+                    paragraphRepository.findById(dto.getParagraphId())
+                            .orElseThrow(() -> new RuntimeException("Paragraph not found"))
+            );
+        }
+
+        if (dto.getFinanceSourceId() != null) {
+            budgetItem.setFinanceSource(
+                    financeSourceRepository.findById(dto.getFinanceSourceId())
+                            .orElseThrow(() -> new RuntimeException("FinanceSource not found"))
+            );
+        }
+
+        if (dto.getDepartmentId() != null) {
+            budgetItem.setDepartment(
+                    departmentRepository.findById(dto.getDepartmentId())
+                            .orElseThrow(() -> new RuntimeException("Department not found"))
+            );
+        }
+
+        if (dto.getActionId() != null) {
+            budgetItem.setAction(
+                    actionRepository.findById(dto.getActionId())
+                            .orElseThrow(() -> new RuntimeException("Action not found"))
+            );
+        }
+
+        // Set scalar fields
+        budgetItem.setExpenseGroup(dto.getExpenseGroup());
+        budgetItem.setProjectName(dto.getProjectName());
+        budgetItem.setPlanWI(dto.getPlanWI());
+        budgetItem.setAdministratorOfFunds(dto.getAdministratorOfFunds());
+        budgetItem.setBudget(dto.getBudget());
+        budgetItem.setTaskName(dto.getTaskName());
+        budgetItem.setDetailedTaskJustification(dto.getDetailedTaskJustification());
+        budgetItem.setAllocationOfExpenses(dto.getAllocationOfExpenses());
+
+        // Year fields...
+        budgetItem.setFinancialNeedsFor2026(dto.getFinancialNeedsFor2026());
+        budgetItem.setLimitOfExpensesFor2026(dto.getLimitOfExpensesFor2026());
+        budgetItem.setFirstMoneyForRealizationIn2026(dto.getFirstMoneyForRealizationIn2026());
+        budgetItem.setMoneyInAgreementFor2026(dto.getMoneyInAgreementFor2026());
+        budgetItem.setAgreementNumberFor2026(dto.getAgreementNumberFor2026());
+
+        budgetItem.setFinancialNeedsFor2027(dto.getFinancialNeedsFor2027());
+        budgetItem.setLimitOfExpensesFor2027(dto.getLimitOfExpensesFor2027());
+        budgetItem.setFirstMoneyForRealizationIn2026(dto.getFirstMoneyForRealizationIn2026());
+        budgetItem.setMoneyInAgreementFor2027(dto.getMoneyInAgreementFor2027());
+        budgetItem.setAgreementNumberFor2027(dto.getAgreementNumberFor2027());
+
+        budgetItem.setFinancialNeedsFor2028(dto.getFinancialNeedsFor2028());
+        budgetItem.setLimitOfExpensesFor2028(dto.getLimitOfExpensesFor2028());
+        budgetItem.setFirstMoneyForRealizationIn2026(dto.getFirstMoneyForRealizationIn2026());
+        budgetItem.setMoneyInAgreementFor2028(dto.getMoneyInAgreementFor2028());
+        budgetItem.setAgreementNumberFor2028(dto.getAgreementNumberFor2028());
+        budgetItem.setFinancialNeedsFor2028(dto.getFinancialNeedsFor2028());
+
+        budgetItem.setLimitOfExpensesFor2029(dto.getLimitOfExpensesFor2029());
+        budgetItem.setFirstMoneyForRealizationIn2026(dto.getFirstMoneyForRealizationIn2026());
+        budgetItem.setMoneyInAgreementFor2029(dto.getMoneyInAgreementFor2029());
+        budgetItem.setAgreementNumberFor2029(dto.getAgreementNumberFor2029());
+
+        budgetItem.setContractWith(dto.getContractWith());
+        budgetItem.setLegalBasisForSubsidy(dto.getLegalBasisForSubsidy());
+        budgetItem.setComments(dto.getComments());
+
         return budgetItemRepository.save(budgetItem);
     }
 
@@ -98,6 +201,42 @@ public class BudgetItemServiceImpl implements BudgetItemService {
         if (source.getLegalBasisForSubsidy() != null) target.setLegalBasisForSubsidy(source.getLegalBasisForSubsidy());
         if (source.getComments() != null) target.setComments(source.getComments());
     }
-
-
+//
+//    /**
+//     * Acquire lock for editing
+//     * Throws exception if lock cannot be obtained
+//     */
+//    @Override
+//    public BudgetItem findByIdForUpdate(Long budgetItemId) {
+//        return budgetItemRepository.findByIdForUpdate(budgetItemId)
+//                .orElseThrow(() -> new EntityNotFoundException(
+//                        "BudgetItem not found: " + budgetItemId
+//                ));
+//    }
+//
+//    /**
+//     * Try to acquire lock with NO_WAIT
+//     * Returns Optional - empty if already locked
+//     */
+//    @Transactional
+//    @Override
+//    public Optional<BudgetItem> tryLockForEditing(Long budgetItemId) {
+//        try {
+//            return budgetItemRepository.findByIdNoWait(budgetItemId);
+//        } catch (LockTimeoutException e) {
+//            return Optional.empty();  // Already locked, don't wait
+//        }
+//    }
+//
+//    /**
+//     * Acquire lock for reading only
+//     */
+//    @Transactional
+//    @Override
+//    public BudgetItem lockForReading(Long budgetItemId) {
+//        return budgetItemRepository.findByIdForRead(budgetItemId)
+//                .orElseThrow(() -> new EntityNotFoundException(
+//                        "BudgetItem not found: " + budgetItemId
+//                ));
+//    }
 }
