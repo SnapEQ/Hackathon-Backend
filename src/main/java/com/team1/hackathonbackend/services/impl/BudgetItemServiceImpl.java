@@ -142,10 +142,164 @@ public class BudgetItemServiceImpl implements BudgetItemService {
     }
 
     @Override
-    public BudgetItem updatePartialBudgetItem(Long id, BudgetItem budgetItem) {
+    @Transactional
+    public BudgetItem updatePartialBudgetItem(Long id, BudgetItemDto dto) {
         BudgetItem existingBudgetItem = getBudgetItemById(id);
 
-        updateNonNullFields(budgetItem, existingBudgetItem);
+        // Load related entities by ID only if provided in DTO
+        if (dto.getBudgetPartId() != null) {
+            existingBudgetItem.setBudgetPart(
+                    budgetPartRepository.findById(dto.getBudgetPartId())
+                            .orElseThrow(() -> new RuntimeException("BudgetPart not found"))
+            );
+        }
+
+        if (dto.getSectionId() != null) {
+            existingBudgetItem.setSection(
+                    sectionRepository.findById(dto.getSectionId())
+                            .orElseThrow(() -> new RuntimeException("Section not found"))
+            );
+        }
+
+        if (dto.getSubSectionId() != null) {
+            existingBudgetItem.setSubSection(
+                    subSectionRepository.findById(dto.getSubSectionId())
+                            .orElseThrow(() -> new RuntimeException("SubSection not found"))
+            );
+        }
+
+        if (dto.getParagraphId() != null) {
+            existingBudgetItem.setParagraph(
+                    paragraphRepository.findById(dto.getParagraphId())
+                            .orElseThrow(() -> new RuntimeException("Paragraph not found"))
+            );
+        }
+
+        System.out.println(dto.getFinanceSourceId());
+
+        if (dto.getFinanceSourceId() != null) {
+            existingBudgetItem.setFinanceSource(
+                    financeSourceRepository.findById(dto.getFinanceSourceId())
+                            .orElseThrow(() -> new RuntimeException("FinanceSource not found"))
+            );
+        }
+
+        if (dto.getDepartmentId() != null) {
+            existingBudgetItem.setDepartment(
+                    departmentRepository.findById(dto.getDepartmentId())
+                            .orElseThrow(() -> new RuntimeException("Department not found"))
+            );
+        }
+
+        if (dto.getActionId() != null) {
+            existingBudgetItem.setAction(
+                    actionRepository.findById(dto.getActionId())
+                            .orElseThrow(() -> new RuntimeException("Action not found"))
+            );
+        }
+
+        // Update scalar fields only if provided (non-null)
+        if (dto.getExpenseGroup() != null) {
+            existingBudgetItem.setExpenseGroup(dto.getExpenseGroup());
+        }
+        if (dto.getProjectName() != null) {
+            existingBudgetItem.setProjectName(dto.getProjectName());
+        }
+        if (dto.getPlanWI() != null) {
+            existingBudgetItem.setPlanWI(dto.getPlanWI());
+        }
+        if (dto.getAdministratorOfFunds() != null) {
+            existingBudgetItem.setAdministratorOfFunds(dto.getAdministratorOfFunds());
+        }
+        if (dto.getBudget() != null) {
+            existingBudgetItem.setBudget(dto.getBudget());
+        }
+        if (dto.getTaskName() != null) {
+            existingBudgetItem.setTaskName(dto.getTaskName());
+        }
+        if (dto.getDetailedTaskJustification() != null) {
+            existingBudgetItem.setDetailedTaskJustification(dto.getDetailedTaskJustification());
+        }
+        if (dto.getAllocationOfExpenses() != null) {
+            existingBudgetItem.setAllocationOfExpenses(dto.getAllocationOfExpenses());
+        }
+
+        // Year fields
+        if (dto.getFinancialNeedsFor2026() != null) {
+            existingBudgetItem.setFinancialNeedsFor2026(dto.getFinancialNeedsFor2026());
+        }
+        if (dto.getLimitOfExpensesFor2026() != null) {
+            existingBudgetItem.setLimitOfExpensesFor2026(dto.getLimitOfExpensesFor2026());
+        }
+        if (dto.getFirstMoneyForRealizationIn2026() != null) {
+            existingBudgetItem.setFirstMoneyForRealizationIn2026(dto.getFirstMoneyForRealizationIn2026());
+        }
+        if (dto.getMoneyInAgreementFor2026() != null) {
+            existingBudgetItem.setMoneyInAgreementFor2026(dto.getMoneyInAgreementFor2026());
+        }
+        if (dto.getAgreementNumberFor2026() != null) {
+            existingBudgetItem.setAgreementNumberFor2026(dto.getAgreementNumberFor2026());
+        }
+
+        // Repeat for 2027, 2028, 2029...
+        if (dto.getFinancialNeedsFor2027() != null) {
+            existingBudgetItem.setFinancialNeedsFor2027(dto.getFinancialNeedsFor2027());
+        }
+        if (dto.getLimitOfExpensesFor2027() != null) {
+            existingBudgetItem.setLimitOfExpensesFor2027(dto.getLimitOfExpensesFor2027());
+        }
+        if (dto.getSecondMoneyForRealizationIn2026() != null) {
+            existingBudgetItem.setSecondMoneyForRealizationIn2026(dto.getSecondMoneyForRealizationIn2026());
+        }
+        if (dto.getMoneyInAgreementFor2027() != null) {
+            existingBudgetItem.setMoneyInAgreementFor2027(dto.getMoneyInAgreementFor2027());
+        }
+        if (dto.getAgreementNumberFor2027() != null) {
+            existingBudgetItem.setAgreementNumberFor2027(dto.getAgreementNumberFor2027());
+        }
+
+        if (dto.getFinancialNeedsFor2028() != null) {
+            existingBudgetItem.setFinancialNeedsFor2028(dto.getFinancialNeedsFor2028());
+        }
+        if (dto.getLimitOfExpensesFor2028() != null) {
+            existingBudgetItem.setLimitOfExpensesFor2028(dto.getLimitOfExpensesFor2028());
+        }
+        if (dto.getThirdMoneyForRealizationIn2026() != null) {
+            existingBudgetItem.setThirdMoneyForRealizationIn2026(dto.getThirdMoneyForRealizationIn2026());
+        }
+        if (dto.getMoneyInAgreementFor2028() != null) {
+            existingBudgetItem.setMoneyInAgreementFor2028(dto.getMoneyInAgreementFor2028());
+        }
+        if (dto.getAgreementNumberFor2028() != null) {
+            existingBudgetItem.setAgreementNumberFor2028(dto.getAgreementNumberFor2028());
+        }
+
+        if (dto.getFinancialNeedsFor2029() != null) {
+            existingBudgetItem.setFinancialNeedsFor2029(dto.getFinancialNeedsFor2029());
+        }
+        if (dto.getLimitOfExpensesFor2029() != null) {
+            existingBudgetItem.setLimitOfExpensesFor2029(dto.getLimitOfExpensesFor2029());
+        }
+        if (dto.getForthMoneyForRealizationIn2026() != null) {
+            existingBudgetItem.setForthMoneyForRealizationIn2026(dto.getForthMoneyForRealizationIn2026());
+        }
+        if (dto.getMoneyInAgreementFor2029() != null) {
+            existingBudgetItem.setMoneyInAgreementFor2029(dto.getMoneyInAgreementFor2029());
+        }
+        if (dto.getAgreementNumberFor2029() != null) {
+            existingBudgetItem.setAgreementNumberFor2029(dto.getAgreementNumberFor2029());
+        }
+
+        // Final fields
+        if (dto.getContractWith() != null) {
+            existingBudgetItem.setContractWith(dto.getContractWith());
+        }
+        if (dto.getLegalBasisForSubsidy() != null) {
+            existingBudgetItem.setLegalBasisForSubsidy(dto.getLegalBasisForSubsidy());
+        }
+        if (dto.getComments() != null) {
+            existingBudgetItem.setComments(dto.getComments());
+        }
 
         return budgetItemRepository.save(existingBudgetItem);
     }

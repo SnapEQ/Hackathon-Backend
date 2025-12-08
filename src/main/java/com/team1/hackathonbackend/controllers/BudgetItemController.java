@@ -35,11 +35,13 @@ public class BudgetItemController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<BudgetItemDto> updatePartialBudgetItem(
+    public ResponseEntity<BudgetItem> updatePartialBudgetItem(
             @PathVariable Long id,
             @RequestBody BudgetItemDto budgetItemDto) {
-        BudgetItem updatedBudgetItem = budgetItemService.updatePartialBudgetItem(id, budgetItemMapper.toEntity(budgetItemDto));
-        return new ResponseEntity<>(budgetItemMapper.toDto(updatedBudgetItem), HttpStatus.OK);
+        System.out.println(budgetItemDto.getExpenseGroup());
+        BudgetItem updated = budgetItemService.updatePartialBudgetItem(id, budgetItemDto);
+        System.out.println(updated.getExpenseGroup());
+        return ResponseEntity.ok(updated);
     }
 
     @GetMapping("/{id}")
@@ -56,6 +58,9 @@ public class BudgetItemController {
         return new ResponseEntity<>(budgetItemsDto, HttpStatus.OK);
 
     }
+
+
+
 //
 //    /**
 //     * Acquire lock and get item for editing

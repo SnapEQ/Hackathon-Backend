@@ -10,7 +10,7 @@ import java.util.Optional;
 public interface BudgetItemService {
     BudgetItem createBudgetItem(BudgetItemDto budgetItemDto);
     List<BudgetItem> getAllBudgetItems();
-    BudgetItem updatePartialBudgetItem(Long id, BudgetItem budgetItem);
+    BudgetItem updatePartialBudgetItem(Long id, BudgetItemDto dto);
     BudgetItem getBudgetItemById(Long id);
     List<BudgetItem> getBudgetItemByDepartmentId(Long departmentId);
 
