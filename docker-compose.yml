@@ -1,8 +1,49 @@
+version: "3.9"
+
 services:
-  db:
-    image: postgres
+  postgres:
+    image: postgres:16-alpine
+    platform: linux/arm64
+    environment:
+      POSTGRES_DB: appdb
+      POSTGRES_USER: appuser
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set in .env}
     ports:
       - "5432:5432"
-    restart: always
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  adminer:
+    image: adminer:4
+    platform: linux/arm64
+    depends_on:
+      - postgres
+    ports:
+      - "8081:8080"
     environment:
-      POSTGRES_PASSWORD: changemeinprod!
+      ADMINER_DEFAULT_SERVER: postgres
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    platform: linux/arm64
+    depends_on:
+      postgres:
+        condition: service_healthy
+    ports:
+      - "8080:8080"
+    environment:
+      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-docker}
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/appdb
+      SPRING_DATASOURCE_USERNAME: appuser
+      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD}
+      JAVA_OPTS: -Xms256m -Xmx512m
+
+volumes:
+  db-data:
