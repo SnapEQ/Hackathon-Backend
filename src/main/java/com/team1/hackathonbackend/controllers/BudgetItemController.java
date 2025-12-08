@@ -35,13 +35,13 @@ public class BudgetItemController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<BudgetItem> updatePartialBudgetItem(
+    public ResponseEntity<BudgetItemDto> updatePartialBudgetItem(
             @PathVariable Long id,
             @RequestBody BudgetItemDto budgetItemDto) {
         System.out.println(budgetItemDto.getExpenseGroup());
         BudgetItem updated = budgetItemService.updatePartialBudgetItem(id, budgetItemDto);
         System.out.println(updated.getExpenseGroup());
-        return ResponseEntity.ok(updated);
+        return ResponseEntity.ok(budgetItemMapper.toDto(updated));
     }
 
     @GetMapping("/{id}")

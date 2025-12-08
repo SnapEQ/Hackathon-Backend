@@ -146,57 +146,57 @@ public class BudgetItemServiceImpl implements BudgetItemService {
     public BudgetItem updatePartialBudgetItem(Long id, BudgetItemDto dto) {
         BudgetItem existingBudgetItem = getBudgetItemById(id);
 
-        // Load related entities by ID only if provided in DTO
-        if (dto.getBudgetPartId() != null) {
-            existingBudgetItem.setBudgetPart(
-                    budgetPartRepository.findById(dto.getBudgetPartId())
-                            .orElseThrow(() -> new RuntimeException("BudgetPart not found"))
-            );
-        }
-
-        if (dto.getSectionId() != null) {
-            existingBudgetItem.setSection(
-                    sectionRepository.findById(dto.getSectionId())
-                            .orElseThrow(() -> new RuntimeException("Section not found"))
-            );
-        }
-
-        if (dto.getSubSectionId() != null) {
-            existingBudgetItem.setSubSection(
-                    subSectionRepository.findById(dto.getSubSectionId())
-                            .orElseThrow(() -> new RuntimeException("SubSection not found"))
-            );
-        }
-
-        if (dto.getParagraphId() != null) {
-            existingBudgetItem.setParagraph(
-                    paragraphRepository.findById(dto.getParagraphId())
-                            .orElseThrow(() -> new RuntimeException("Paragraph not found"))
-            );
-        }
-
-        System.out.println(dto.getFinanceSourceId());
-
-        if (dto.getFinanceSourceId() != null) {
-            existingBudgetItem.setFinanceSource(
-                    financeSourceRepository.findById(dto.getFinanceSourceId())
-                            .orElseThrow(() -> new RuntimeException("FinanceSource not found"))
-            );
-        }
-
-        if (dto.getDepartmentId() != null) {
-            existingBudgetItem.setDepartment(
-                    departmentRepository.findById(dto.getDepartmentId())
-                            .orElseThrow(() -> new RuntimeException("Department not found"))
-            );
-        }
-
-        if (dto.getActionId() != null) {
-            existingBudgetItem.setAction(
-                    actionRepository.findById(dto.getActionId())
-                            .orElseThrow(() -> new RuntimeException("Action not found"))
-            );
-        }
+//        // Load related entities by ID only if provided in DTO
+//        if (dto.getBudgetPartId() != null && !dto.getBudgetPartId().equals(existingBudgetItem.getBudgetPart().getId())) {
+//            existingBudgetItem.setBudgetPart(
+//                    budgetPartRepository.findById(dto.getBudgetPartId())
+//                            .orElseThrow(() -> new RuntimeException("BudgetPart not found"))
+//            );
+//        }
+//
+//        if (dto.getSectionId() != null && !dto.getSectionId().equals(existingBudgetItem.getSection().getId())) {
+//            existingBudgetItem.setSection(
+//                    sectionRepository.findById(dto.getSectionId())
+//                            .orElseThrow(() -> new RuntimeException("Section not found"))
+//            );
+//        }
+//
+//        if (dto.getSubSectionId() != null && !dto.getSubSectionId().equals(existingBudgetItem.getSubSection().getId())) {
+//            existingBudgetItem.setSubSection(
+//                    subSectionRepository.findById(dto.getSubSectionId())
+//                            .orElseThrow(() -> new RuntimeException("SubSection not found"))
+//            );
+//        }
+//
+//        if (dto.getParagraphId() != null && !dto.getParagraphId().equals(existingBudgetItem.getParagraph().getId())) {
+//            existingBudgetItem.setParagraph(
+//                    paragraphRepository.findById(dto.getParagraphId())
+//                            .orElseThrow(() -> new RuntimeException("Paragraph not found"))
+//            );
+//        }
+//
+//        // System.out.println(dto.getFinanceSourceId());
+//
+//        if (dto.getFinanceSourceId() != null && !dto.getFinanceSourceId().equals(existingBudgetItem.getFinanceSource().getId())) {
+//            existingBudgetItem.setFinanceSource(
+//                    financeSourceRepository.findById(dto.getFinanceSourceId())
+//                            .orElseThrow(() -> new RuntimeException("FinanceSource not found"))
+//            );
+//        }
+//
+//        if (dto.getDepartmentId() != null && !dto.getDepartmentId().equals(existingBudgetItem.getDepartment().getId())) {
+//            existingBudgetItem.setDepartment(
+//                    departmentRepository.findById(dto.getDepartmentId())
+//                            .orElseThrow(() -> new RuntimeException("Department not found"))
+//            );
+//        }
+//
+//        if (dto.getActionId() != null && !dto.getActionId().equals(existingBudgetItem.getAction().getId())) {
+//            existingBudgetItem.setAction(
+//                    actionRepository.findById(dto.getActionId())
+//                            .orElseThrow(() -> new RuntimeException("Action not found"))
+//            );
+//        }
 
         // Update scalar fields only if provided (non-null)
         if (dto.getExpenseGroup() != null) {
@@ -224,7 +224,7 @@ public class BudgetItemServiceImpl implements BudgetItemService {
             existingBudgetItem.setAllocationOfExpenses(dto.getAllocationOfExpenses());
         }
 
-        // Year fields
+        // Financial fields for 2026
         if (dto.getFinancialNeedsFor2026() != null) {
             existingBudgetItem.setFinancialNeedsFor2026(dto.getFinancialNeedsFor2026());
         }
@@ -241,7 +241,7 @@ public class BudgetItemServiceImpl implements BudgetItemService {
             existingBudgetItem.setAgreementNumberFor2026(dto.getAgreementNumberFor2026());
         }
 
-        // Repeat for 2027, 2028, 2029...
+        // Financial fields for 2027
         if (dto.getFinancialNeedsFor2027() != null) {
             existingBudgetItem.setFinancialNeedsFor2027(dto.getFinancialNeedsFor2027());
         }
@@ -258,6 +258,7 @@ public class BudgetItemServiceImpl implements BudgetItemService {
             existingBudgetItem.setAgreementNumberFor2027(dto.getAgreementNumberFor2027());
         }
 
+        // Financial fields for 2028
         if (dto.getFinancialNeedsFor2028() != null) {
             existingBudgetItem.setFinancialNeedsFor2028(dto.getFinancialNeedsFor2028());
         }
@@ -274,6 +275,7 @@ public class BudgetItemServiceImpl implements BudgetItemService {
             existingBudgetItem.setAgreementNumberFor2028(dto.getAgreementNumberFor2028());
         }
 
+        // Financial fields for 2029
         if (dto.getFinancialNeedsFor2029() != null) {
             existingBudgetItem.setFinancialNeedsFor2029(dto.getFinancialNeedsFor2029());
         }
@@ -290,7 +292,7 @@ public class BudgetItemServiceImpl implements BudgetItemService {
             existingBudgetItem.setAgreementNumberFor2029(dto.getAgreementNumberFor2029());
         }
 
-        // Final fields
+        // Other fields
         if (dto.getContractWith() != null) {
             existingBudgetItem.setContractWith(dto.getContractWith());
         }
